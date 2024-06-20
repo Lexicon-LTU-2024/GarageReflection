@@ -29,16 +29,8 @@ public class ConsoleUI : IUI
         Console.WriteLine(message);
     }
 
-    public void ShowMeny()
+    public ConsoleKeyInfo GetKeyInfo()
     {
-        Print("Welcome to the Garage");
-        Print($"{MenyConstants.Park}, Park");
-        Print($"{MenyConstants.ListAll}, List Parked");
-        Print($"{MenyConstants.ListByType}, List By Type");
-        Print($"{MenyConstants.Unpark}, UnPark");
-        Print($"{MenyConstants.Search}, Search");
-        Print($"{MenyConstants.Seed}, Seed Vehicles");
-        Print($"{MenyConstants.Load}, Load");
-        Print($"{MenyConstants.Quit}, Quit");
+        return Console.ReadKey();
     }
 }

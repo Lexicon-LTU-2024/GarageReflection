@@ -22,26 +22,55 @@ internal class GarageManager
         Vehicle.Callback = Run;
     }
 
-
-
     internal void Run()
     {
+        var menuItems = GetMainMenuItems();
+        int selectedIndex = 0;
 
         do
         {
-            ui.GetKey();
             ui.Clear();
-         
-            ui.ShowMeny();
+            ShowMeny(menuItems, selectedIndex);
+            var key = ui.GetKeyInfo();
 
-            var input = util.AskForKey("");
-            if (menyOptions.ContainsKey(input))
-                menyOptions[input]?.Invoke();
-
-            
-
+            if (key.Key == ConsoleKey.UpArrow)
+            {
+                if (selectedIndex > 0)
+                    selectedIndex--;
+            }
+            else if (key.Key == ConsoleKey.DownArrow)
+            {
+                if (selectedIndex < menuItems.Length - 1)
+                    selectedIndex++;
+            }
+            else if (key.Key == ConsoleKey.Enter)
+            {
+                if (menyOptions.TryGetValue(selectedIndex, out Action? value))
+                {
+                    value?.Invoke();
+                    Pause();
+                }
+            }
 
         } while (true);
+    }
+
+    private void ShowMeny(string[] menyItems, int selectedIndex)
+    {
+        for (int i = 0; i < menyItems.Length; i++)
+        {
+            if (i == selectedIndex)
+            {
+                Console.BackgroundColor = ConsoleColor.Green;
+                Console.ForegroundColor = ConsoleColor.Black;
+                ui.Print($"> {menyItems[i]}");
+                Console.ResetColor();
+            }
+            else
+            {
+                ui.Print($"  {menyItems[i]}");
+            }
+        }
     }
 
     private void Seed()
@@ -74,7 +103,7 @@ internal class GarageManager
     private void Load()
     {
         var answer = util.AskForString("Change the current garage? Y for yes, N for no");
-        if(answer.Equals("Y", StringComparison.CurrentCultureIgnoreCase)) handler.Load();
+        if (answer.Equals("Y", StringComparison.CurrentCultureIgnoreCase)) handler.Load();
     }
 
     private void Search()
@@ -117,8 +146,8 @@ internal class GarageManager
     private void UnPark()
     {
         var regNo = util.AskForString("Enter reg number").ToUpper();
-        ui.Print(handler.Leave(regNo) ? 
-            $"Vehicle: [{regNo}] unparked" : 
+        ui.Print(handler.Leave(regNo) ?
+            $"Vehicle: [{regNo}] unparked" :
             $"Can´t find vehicle with registration number {regNo}");
     }
 
@@ -149,7 +178,7 @@ internal class GarageManager
         var vehicle = handler.GetVehicle(vehicleDTO);
 
         ui.Print(handler.Park(vehicle) ?
-            $"[{vehicleType}] with registration number:{vehicle.RegNo} parked" : 
+            $"[{vehicleType}] with registration number:{vehicle.RegNo} parked" :
             $"Something failed");
     }
 
@@ -175,6 +204,7 @@ internal class GarageManager
         if (handler.Get(regNo) != null)
         {
             ui.Print($"Reg number:{regNo} is already in the garage!");
+            Pause(message: false);
             return false;
         }
         return true;
@@ -195,5 +225,26 @@ internal class GarageManager
             }
             return parkMenyOptions = builder.ToString();
         }
+    }
+
+    public string[] GetMainMenuItems()
+    {
+        return new string[]
+        {
+            $"Park",
+            $"List Parked",
+            $"List By Type",
+            $"UnPark",
+            $"Search",
+            $"Seed Vehicles",
+            $"Load",
+            $"Quit"
+        };
+    }
+
+    private void Pause(bool message = true)
+    {
+        if(message)  Console.WriteLine("\nPress any key to go back to main meny");
+        Console.ReadKey(intercept: true);
     }
 }
